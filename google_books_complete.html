@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>GoogleBooksAPI</title>
+    <style>
+        td {
+            /* border-bottom: 1px solid #ccc;
+            border-left: 1px solid #ccc;
+            margin-left: 20px; */
+        }
+        #send {
+            margin-top: 15px;
+            border: 8px double #0090bb;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <h1 class="text-center text-info my-4">Book Search</h1>
+    <div class="container w-75">
+        <form id="form" class="mb-4">
+            <input type="text" id="key" class="form-control">
+            <div class="text-center"><button id="send">Search</button></div>
+        </form>
+    </div>
+    <div class="container">
+        <table id="table" class="table table-bordered">
+            <tr>
+                <td class="text-center" style="width:800px">name</td>
+                <td class="text-center" style="width:200px">publisher</td>
+                <td class="text-center" style="width:200px">image</td>
+            </tr>
+        </table>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script>
+    // 検索ボタンをクリックしたら
+    $("#send").on("click submit", function(){
+        document.getElementById("form").addEventListener("submit", function(event){
+            event.preventDefault();
+        })
+
+        const url = "https://www.googleapis.com/books/v1/volumes?q="+$("#key").val();
+        $.ajax({
+            url: url,
+            dataType: "json"
+        }).done(function(data){ //↑でjsonと指定するとオブジェクトに自動で変換してくれている
+            console.log(data);
+            const len = data.items.length;
+            let html;
+            for(let i=0; i<len; i++) {
+                if(typeof data.items[i].volumeInfo.publisher=="undefined"){
+                    data.items[i].volumeInfo.publisher="出版社不明"
+                }
+                if (data.items[i].volumeInfo.imageLinks) {
+                    html += `
+                        <tr>
+                            <td>${data.items[i].volumeInfo.title}</td>
+                            <td>${data.items[i].volumeInfo.publisher}</td>
+                            <td>
+                                <a target='_blank' href="${data.items[i].volumeInfo.infoLink}">
+                                <img src="${data.items[i].volumeInfo.imageLinks.thumbnail}" alt="画像データ">
+                            </td>
+                        </tr>
+                    `;
+                }  
+            }
+
+            $("#table").empty().hide().append(html).fadeIn(1000);
+
+        });
+    });
+
+    </script>
+</body>
+</html>
